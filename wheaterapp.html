@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        
+    <style>
+
+    *{
+    font-family: Arial, Verdana;
+}
+
+.jumbotron{
+    background: transparent;
+}
+
+.fullscreen-bg {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: -100;
+}
+
+.showcase{
+    padding: 3em;
+    border: 1px solid #999;
+    background:rgba(141, 141, 248, 0.3); 
+    border-radius: 10px;
+}
+
+p.lead.text-muted{   
+    background: rgba(223, 223, 235, 0.9);  
+    color: black;  
+}
+
+h1.jumbotron-heading{
+    font-size: 3.5rem;
+    color: rgb(25, 25, 27);
+}
+
+h1.jumbotron-heading span{
+    font-size: 3.0rem;    
+}
+
+.form-group-item{
+    background: transparent;
+    width: 100%;
+    padding: 8px; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+    border: none;    
+}
+
+.form-group-item:focus, .card{
+    
+    background: rgba(223, 223, 235, 0.2);
+    border-bottom: 1px solid #dedede;
+}
+
+
+.card-text, .lead{
+    border-bottom: 1px solid #dedede;
+}
+
+#searchButton{
+    border: 1px solid #dedede;
+}
+
+.adds{
+    margin-bottom: 39px;
+}
+
+.fa{
+    color: rgb(40, 111, 243);
+}
+
+.alert{
+    opacity: 0.3;
+    color: #222;
+}
+
+    
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #444;
+    opacity: 1; /* Firefox */
+    
+}
+span{
+    display: block-inline;
+    width: 100%;
+}
+
+@media only screen and (max-width: 400px) {
+    h1.jumbotron-heading span{
+        font-size: 2.4rem;
+        color: rgb(141, 141, 248);
+        
+    }
+
+    h1.jumbotron-heading{
+        font-size: 2.0rem;
+        
+    }
+
+}
+    
+    </style> 
+</head>
+<body>
+            <div class="container">
+                <main role="main">
+                        <section class="jumbotron text-center">
+                          <div class="container">
+                            <h1 class="jumbotron-heading"><span class="text-primary">Wheater</span> APP</h1>
+                            <div class="fullscreen-bg">
+                
+                              <video autoplay muted loop id="myVideo">
+                                  <source src="wheater/Sea Of Clouds.mp4" type="video/mp4">
+                                  Your browser does not support HTML5 video.
+                              </video>   
+                            </div>
+                            <div class="showcase">
+                            <p class="lead">
+                                Search for your wheater
+                            </p>                            
+                                <form>
+                                    <div class="form-group">
+                                        <span class="badge">1.
+                                            <input id="myText" type="text" class="form-group-item" placeholder="Enter your city">
+                                        </span>
+                                        <span class="badge">2.
+                                            <select id="mySelect" class="form-group-item"></select>
+                                        </span>
+                                    </div>
+                                    <button id="searchButton" class="btn btn-primary btn-block mb-3">Search for now</button>
+                                </form>
+                                <div id="errorDetails"></div>
+                                <div id="resultDetails" class="row"></div>
+                            </div>
+                            
+                          </div>
+                           
+                        </section>
+                    </main>
+            </div>
+
+    
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script>
+        class Wheaterapp{
+
+        constructor() {
+                                           
+        }
+
+
+        async fetchAsync(url) {           
+             try{
+                // await response of fetch call
+                let response = await fetch(url);
+                // only proceed once promise is resolved
+                let data = await response.json();
+                // only proceed once second promise is resolved
+                console.log(data);
+                    this.showDetails(data) 
+
+                }
+                catch(e){
+                    console.log(e.message);
+                }        
+        }
+
+        selectOptions(){
+            try{
+                fetch("wheater/city.json")
+                    .then(res => res.json())
+                    .then(data => {
+
+                        data.forEach(function(result, index) {
+                            let dataOptions = `<option value="${index}">${result.name}  -${result.code.toLowerCase()}</option>`;
+                            $('#mySelect').append(dataOptions);                        
+                             dataOptions = ``;
+                        
+                        }) 
+                     
+                })
+            }
+            catch(e){
+                console.log(e.message);
+            }
+
+        }
+
+        showDetails(data) {
+            if(data.cod ==="404"){
+              
+            let errorMessage = `
+                    <div class="alert alert-light" role="alert">
+                        Sorry the requested ${data.message} !!
+                    </div>`
+                    $('#errorDetails').html(errorMessage);
+            } 
+            else if(data.weather) {
+                $('#errorDetails').html('');            
+            
+                let wheatherImage = `http://openweathermap.org/img/w/${data.weather[0].icon}.png`;
+                let windDeg = '';
+                    if(data.wind.deg === 0){
+                        windDeg = 'North';
+                    }
+                    if(data.wind.deg > 0 && 90 < data.wind.deg) {
+                        windDeg = 'North East';
+                    }
+                    if(data.wind.deg === 90){
+                        windDeg = 'East';
+                    } 
+                    if(data.wind.deg > 90 && 180 < data.wind.deg) {
+                        windDeg = 'South East';
+                    } 
+                    if(data.wind.deg === 180){
+                        windDeg = 'South';
+                    }
+                    if(data.wind.deg > 180 && 270 < data.wind.deg) {
+                        windDeg = 'South West';
+                    }   
+                    if(data.wind.deg === 270){
+                        windDeg = 'West';
+                    }                                         
+                let sunset = new Date(data.sys.sunset * 1000);
+                let sunsetTime = ('0' + sunset.getHours()).slice(-2)+':'+('0' + sunset.getMinutes()).slice(-2);
+                let sunrise = new Date(data.sys.sunrise * 1000);
+                let sunriseTime = ('0' + sunrise.getHours()).slice(-2)+':'+('0' + sunrise.getMinutes()).slice(-2);
+                let resultDetails = '';
+                      
+            resultDetails =`            
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${data.name}<img src='${wheatherImage}'></h5>
+                            <p class="card-text"><i class="fa fa-arrow-circle-up" aria-hidden="true"></i>
+                                : ${Math.floor(data.main.temp_max-273)} &#8451</p>
+                            <p class="card-text"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
+                                : ${Math.floor(data.main.temp-273)} &#8451</p>
+                            <p class="card-text"><i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
+                                : ${Math.floor(data.main.temp_min-273)} &#8451</p>
+                            <p class="card-text"><i class="fa fa-tint" aria-hidden="true"></i>
+                                : ${Math.floor(data.main.humidity)} %</p>
+                            <p class="card-text"><i class="fa fa-bullseye" aria-hidden="true"></i>
+                                : ${Math.floor(data.main.pressure)} hPa</p> 
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title adds">Additionals</h5>
+                            <p class="card-text"><i class="fa fa-sun-o" aria-hidden="true"></i> : ${sunriseTime}</p>                      
+                            <p class="card-text"><i class="fa fa-moon-o" aria-hidden="true"></i> : ${sunsetTime}</p>
+                            <p class="card-text"><i class="fa fa-signal" aria-hidden="true"></i>: ${data.wind.speed} m / s</p>
+                            <p class="card-text"><i class="fa fa-binoculars" aria-hidden="true"></i> : ${data.visibility/1000} km</p>
+                            <p class="card-text"><i class="fa fa-compass" aria-hidden="true"></i> : ${(windDeg) ? windDeg : 'No data'} </p>                        
+                        </div>
+                    </div>
+                </div>`;
+
+            $('#resultDetails').html(resultDetails);
+
+        }
+    }
+}       
+    let wheaterApp = new Wheaterapp();
+    let url='';
+
+    $( "#searchButton" ).click(function(e) {
+        e.preventDefault();
+        let myText = $('#myText').val();
+        let mySelect = $( "#mySelect option:selected" ).text();
+        let countryCode = mySelect.split('-')[1];
+                
+        url = "http://api.openweathermap.org/data/2.5/weather?q="+myText+","+countryCode+"&APPID=a537f3c4a68e157321b7e1461534cd63"
+            if(myText!==''){
+                wheaterApp.fetchAsync(url);                
+            }
+             
+        })  
+        
+        wheaterApp.selectOptions();       
+</script>
+</body>
+</html>
